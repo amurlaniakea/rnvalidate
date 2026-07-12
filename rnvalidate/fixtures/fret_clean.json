@@ -1,0 +1,19 @@
+{
+  "pdb_id": "hairpin_clean",
+  "exp": {
+    "fret_distances_angstrom": {
+      "1-9": 17.44,
+      "3-11": 14.42
+    },
+    "shape_reactivity": {
+      "1": 0.10,
+      "3": 0.12,
+      "10": 0.08,
+      "12": 0.11
+    }
+  },
+  "buffer": {
+    "pH": 7.0,
+    "mg_mM": 0.0
+  }
+}

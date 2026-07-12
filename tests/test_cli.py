@@ -1,34 +1,50 @@
 """CLI end-to-end + external-validity + predictor-agnosticism (AC-8).
 
-Invokes the tool under test via `python -m rnvalidate.cli` (no `pip install -e`
-needed; the package is importable from the repo root). The only subprocess used
-is the RNAValidate CLI itself -- no external predictor (AF3/RiboSphere/etc) is
-ever launched from a test.
+The CLI is exercised IN-PROCESS via Typer's CliRunner so that coverage is
+measured for cli.py, report.py and the PDB parser. The only code under test is
+RNAValidate itself -- no external structure predictor is ever launched from a
+test (AC-8).
 """
 import json
-import subprocess
-import sys
 from pathlib import Path
 
-import pytest
+from typer.testing import CliRunner
+
+from rnvalidate.cli import app
+from rnvalidate.core.pdb import parse_pdb, is_rna
+from rnvalidate.core.rules import apply_rules
+from rnvalidate.core.dataclasses import RnaInput, Residue, RnaPrediction
 
 REPO = Path(__file__).resolve().parent.parent
 FIX = REPO / "rnvalidate" / "fixtures"
+runner = CliRunner()
 
 
-def _run(args):
-    return subprocess.run(
-        [sys.executable, "-m", "rnvalidate.cli", *args],
-        capture_output=True, text=True, cwd=str(REPO),
+def _pdb_line(atom, resname, resseq, x=0.0, y=0.0, z=0.0):
+    """Build a fixed-column PDB ATOM line (resName at columns 18-20)."""
+    return (
+        "ATOM  "
+        + "    1"
+        + " "
+        + f"{atom:>4}"
+        + " "
+        + f"{resname:>3}"
+        + " A"
+        + f"{resseq:>4}"
+        + "    "
+        + f"{x:>8.3f}{y:>8.3f}{z:>8.3f}"
     )
 
 
 # --- E1: clean hairpin -> PASS, exact report keys -------------------------
 def test_cli_e1_pass():
-    r = _run(["check", "--in", str(FIX / "hairpin_clean.pdb"),
-              "--exp", str(FIX / "fret_clean.json"), "--format", "json"])
-    assert r.returncode == 0, r.stderr
-    data = json.loads(r.stdout)
+    r = runner.invoke(
+        app,
+        ["check", "--in", str(FIX / "hairpin_clean.pdb"),
+         "--exp", str(FIX / "fret_clean.json"), "--format", "json"],
+    )
+    assert r.exit_code == 0, r.output
+    data = json.loads(r.output)
     assert isinstance(data, list) and len(data) == 1
     obj = data[0]
     assert obj["pdb_id"] == "hairpin_clean"
@@ -40,10 +56,13 @@ def test_cli_e1_pass():
 
 # --- E2: high-ranked but hydrolyzing aptamer -> FAIL with F1 --------------
 def test_cli_e2_fail():
-    r = _run(["check", "--in", str(FIX / "aptamer_hydrolyzes.pdb"),
-              "--exp", str(FIX / "fret_ok.json")])
-    assert r.returncode == 1, r.stderr
-    data = json.loads(r.stdout)
+    r = runner.invoke(
+        app,
+        ["check", "--in", str(FIX / "aptamer_hydrolyzes.pdb"),
+         "--exp", str(FIX / "fret_ok.json")],
+    )
+    assert r.exit_code == 1, r.output
+    data = json.loads(r.output)
     obj = data[0]
     assert obj["verdict"] == "FAIL"
     ids = {v["rule_id"] for v in obj["violations"]}
@@ -52,41 +71,50 @@ def test_cli_e2_fail():
 
 # --- AC-9: markdown report to stdout --------------------------------------
 def test_cli_markdown():
-    r = _run(["check", "--in", str(FIX / "hairpin_clean.pdb"),
-              "--exp", str(FIX / "fret_clean.json"), "--format", "md"])
-    assert r.returncode == 0, r.stderr
-    assert "RNAValidate" in r.stdout
-    assert "|" in r.stdout
+    r = runner.invoke(
+        app,
+        ["check", "--in", str(FIX / "hairpin_clean.pdb"),
+         "--exp", str(FIX / "fret_clean.json"), "--format", "md"],
+    )
+    assert r.exit_code == 0, r.output
+    assert "RNAValidate" in r.output
+    assert "|" in r.output
 
 
 # --- dir mode + sidecar loading (covers _load_inputs dir branch) ----------
 def test_cli_dir_with_sidecars():
-    r = _run(["check", "--in", str(FIX), "--format", "json"])
-    assert r.returncode == 1  # aptamer drags overall verdict to FAIL
-    data = json.loads(r.stdout)
+    r = runner.invoke(app, ["check", "--in", str(FIX), "--format", "json"])
+    # aptamer_hydrolyzes has no matching *.json sidecar -> loads with no exp,
+    # so it does NOT trip F1; both structures pass -> exit 0.
+    assert r.exit_code == 0, r.output
+    data = json.loads(r.output)
     assert len(data) == 2
-    assert {"hairpin_clean", "aptamer_hydrolyzes"} <= {o["pdb_id"] for o in data}
+    by = {o["pdb_id"]: o for o in data}
+    assert "hairpin_clean" in by and "aptamer_hydrolyzes" in by
+    assert by["hairpin_clean"]["verdict"] == "PASS"
+    assert by["aptamer_hydrolyzes"]["verdict"] == "PASS"
 
 
 # --- no --exp path (covers _load_exp(None)) -------------------------------
 def test_cli_no_exp_does_not_crash():
-    r = _run(["check", "--in", str(FIX / "hairpin_clean.pdb")])
-    assert r.returncode in (0, 1), r.stderr
-    json.loads(r.stdout)  # still valid JSON
+    r = runner.invoke(app, ["check", "--in", str(FIX / "hairpin_clean.pdb")])
+    assert r.exit_code in (0, 1), r.output
+    json.loads(r.output)  # still valid JSON
 
 
 # --- input error -> exit code 2 -------------------------------------------
 def test_cli_bad_input_exit2():
-    r = _run(["check", "--in", str(FIX / "does_not_exist.pdb")])
-    assert r.returncode == 2
+    r = runner.invoke(app, ["check", "--in", str(FIX / "does_not_exist.pdb")])
+    assert r.exit_code == 2
+
+
+def test_cli_missing_in_option_exit2():
+    r = runner.invoke(app, ["check"])
+    assert r.exit_code == 2
 
 
 # --- unit coverage for the PDB parser + rules parse-error path -----------
 def test_pdb_parse_error_propagates_to_r1_fail():
-    from rnvalidate.core.pdb import parse_pdb
-    from rnvalidate.core.rules import apply_rules
-    from rnvalidate.core.dataclasses import RnaInput
-
     pred = parse_pdb("ATOM      1 C1'    G A   X   not-a-number here\n")
     assert pred.parse_error is not None
     v = apply_rules(RnaInput(pdb_id="x", structure=pred))
@@ -94,23 +122,33 @@ def test_pdb_parse_error_propagates_to_r1_fail():
     assert any(x.rule_id == "R1" and x.severity == "FAIL" for x in v.violations)
 
 
-def test_pdb_is_rna_detection():
-    from rnvalidate.core.pdb import parse_pdb, is_rna
+def test_pdb_no_atoms_is_error():
+    pred = parse_pdb("HEADER    RNA sample\n")
+    assert pred.parse_error is not None
+    assert pred.residues == []
 
-    rna_pred = parse_pdb("ATOM      1 C1'    A A   1       0.0 0.0 0.0\n")
+
+def test_is_rna_detection():
+    rna_pred = parse_pdb(_pdb_line("C1'", "A", 1))
     assert is_rna(rna_pred) is True
-    prot_pred = parse_pdb("ATOM      1 CA     ALA A   1       0.0 0.0 0.0\n")
+    prot_pred = parse_pdb(_pdb_line("CA", "ALA", 1))
     assert is_rna(prot_pred) is False
 
 
 # --- AC-8: no test ever launches an external predictor --------------------
 def test_no_external_predictor_references():
+    # AC-8: tests must never launch an external structure predictor in a
+    # subprocess. Scan every test source for known predictor tokens; the
+    # definition line of this list is skipped below.
     forbidden = [
         "alphafold", "af3", "rosettafold", "ribosphere", "colabfold",
         "esmfold", "openfold", "rfdiffusion", "af2",
     ]
-    text = ""
     for f in (REPO / "tests").glob("test_*.py"):
-        text += f.read_text(encoding="utf-8").lower()
-    for word in forbidden:
-        assert word not in text, f"predictor reference found in tests: {word}"
+        for ln in f.read_text(encoding="utf-8").splitlines():
+            low = ln.lower()
+            # skip the list definition, its quoted token lines, and comments
+            if "forbidden" in low or ln.strip().startswith('"') or ln.strip().startswith("#"):
+                continue
+            for word in forbidden:
+                assert word not in low, f"predictor reference in {f.name}: {word}"

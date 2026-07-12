@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+
+# Coverage / pytest
+.coverage
+.pytest_cache/
+htmlcov/
+
+# Aislamiento: jamas filtrar secretos del usuario
+.hermes/
+.gnupg/
+.aws/
+credentials/
+*.db
+
+# Editor
+.vscode/
+.idea/

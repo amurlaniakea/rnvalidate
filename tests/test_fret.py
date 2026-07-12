@@ -58,3 +58,29 @@ def test_fret_skip_unparseable_pdb():
     assert v.rule_id == "R1"
     assert v.severity == "SKIP"
     assert "unparseable" in v.reason
+
+
+def test_fret_malformed_pair_key_skips():
+    # Key "1" is not "i-j" -> ValueError caught -> no matching pairs -> SKIP.
+    rna = RnaInput(
+        pdb_id="t",
+        structure=_struct({1: (0.0, 0.0, 0.0), 2: (10.0, 0.0, 0.0)}),
+        exp={"fret_distances_angstrom": {"1": 10.0}},
+    )
+    v = check_fret(rna)
+    assert v is not None
+    assert v.rule_id == "R1"
+    assert v.severity == "SKIP"
+
+
+def test_fret_pair_absent_in_structure_skips():
+    # pair references residue 99 which is not in the structure -> SKIP.
+    rna = RnaInput(
+        pdb_id="t",
+        structure=_struct({1: (0.0, 0.0, 0.0)}),
+        exp={"fret_distances_angstrom": {"1-99": 10.0}},
+    )
+    v = check_fret(rna)
+    assert v is not None
+    assert v.rule_id == "R1"
+    assert v.severity == "SKIP"

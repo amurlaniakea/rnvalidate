@@ -1,0 +1,18 @@
+{
+  "pdb_id": "aptamer_hydrolyzes",
+  "exp": {
+    "fret_distances_angstrom": {
+      "1-8": 14.87
+    },
+    "shape_reactivity": {
+      "1": 0.10,
+      "5": 0.85,
+      "6": 0.88,
+      "7": 0.80
+    }
+  },
+  "buffer": {
+    "pH": 9.0,
+    "mg_mM": 10.0
+  }
+}

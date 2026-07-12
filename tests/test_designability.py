@@ -63,3 +63,19 @@ def test_designability_skip_unparseable():
     assert v is not None
     assert v.rule_id == "R4"
     assert v.severity == "SKIP"
+
+
+def test_designability_fail_not_designable():
+    # Extended strand: sequential C1' spaced 7 A (valid backbone) but no
+    # spatial pairing (non-sequential residues > 12 A apart) -> not a folded
+    # motif -> not_designable FAIL.
+    residues = [
+        Residue(resseq=i + 1, resname="A", c1_coord=(0.0, 7.0 * i, 0.0))
+        for i in range(8)
+    ]
+    rna = RnaInput(pdb_id="t", structure=RnaPrediction(residues=residues))
+    v = check_designability(rna)
+    assert v is not None
+    assert v.rule_id == "R4"
+    assert v.severity == "FAIL"
+    assert "not_designable" in v.reason
