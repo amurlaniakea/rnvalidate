@@ -179,10 +179,14 @@ def test_no_model_subprocess_in_testfile():
 # S032: CLI real vía subprocess (proceso separado, no la función).
 # ---------------------------------------------------------------------------
 def test_cli_subprocess_real_sarif():
+    # Subprocess REAL (proceso separado), portable: usa sys.executable -m rnvalidate.cli
+    # en vez de confiar en el binario "rnvalidate" en el PATH (falla si el venv no está activado).
+    import sys
     pdb = PKG_FIXTURES / "aptamer_hydrolyzes.pdb"
     exp = PKG_FIXTURES / "fret_ok.json"
     proc = subprocess.run(
-        ["rnvalidate", "check", "--in", str(pdb), "--exp", str(exp), "--format", "sarif"],
+        [sys.executable, "-m", "rnvalidate.cli", "check",
+         "--in", str(pdb), "--exp", str(exp), "--format", "sarif"],
         capture_output=True, text=True, timeout=120,
     )
     assert proc.returncode == 1  # FAIL (F1 disparada) -> exit 1, core intacto
