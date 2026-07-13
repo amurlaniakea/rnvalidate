@@ -17,7 +17,7 @@ import typer
 
 from rnvalidate.core.dataclasses import RnaInput
 from rnvalidate.core.pdb import parse_pdb
-from rnvalidate.core.report import to_json, to_markdown
+from rnvalidate.core.report import to_json, to_markdown, to_sarif
 from rnvalidate.core.rules import apply_rules
 
 app = typer.Typer(help="Validador/ranking perimetral de estructuras 3D RNA vs datos experimentales")
@@ -64,7 +64,7 @@ def _load_inputs(in_path: Optional[Path], exp_path: Optional[Path]) -> List[RnaI
 def check(
     in_path: Path = typer.Option(None, "--in", help="archivo PDB o directorio"),
     exp: Path = typer.Option(None, "--exp", help="JSON de datos experimentales"),
-    format: str = typer.Option("json", "--format", help="json | md"),
+    format: str = typer.Option("json", "--format", help="json | md | sarif"),
 ):
     """Valida una estructura 3D RNA contra datos experimentales y reglas duras."""
     try:
@@ -74,7 +74,12 @@ def check(
         raise typer.Exit(code=2)
 
     verdicts = [apply_rules(r) for r in rnas]
-    out = to_json(verdicts) if format == "json" else to_markdown(verdicts)
+    if format == "sarif":
+        out = to_sarif(verdicts, rnas)
+    elif format == "md":
+        out = to_markdown(verdicts)
+    else:
+        out = to_json(verdicts)
     typer.echo(out)
 
     if any(v.verdict == "FAIL" for v in verdicts):
