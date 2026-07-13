@@ -9,7 +9,7 @@ description = "Perimeter validator/ranker for AI-predicted 3D RNA structures aga
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "AGPL-3.0-or-later" }
-authors = [{ name = "Pedro Sordo Martinez", email = "amurlaniakea@gmail.com" }]
+authors = [{ name = "Pedro Sordo Martínez", email = "amurlaniakea@gmail.com" }]
 keywords = ["rna", "validation", "fret", "cryo-em", "shape", "sanity-check", "aptamer"]
 dependencies = [
     "typer>=0.12",
