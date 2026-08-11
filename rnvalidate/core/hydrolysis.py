@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """F1 - Propension de hidrolisis cinetica / falsos positivos en tubo.
 
 Feature DERIVADA (regla propuesta, marcada como riesgo R5): estima la propension

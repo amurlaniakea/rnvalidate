@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """R2 — cryo-EM cross-correlation (external-validity unit tests).
 
 The checker reads a pre-computed map/model correlation (0..1) supplied by the

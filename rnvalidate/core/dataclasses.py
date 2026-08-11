@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """FUENTE UNICA de dataclasses para RNAValidate.
 
 Todos los modulos importan desde aqui. NUNCA se redefine

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Parser minimo de PDB para RNA (sin Biopython obligatorio).
 
 Lee solo lineas ATOM/HETATM. Extrae residuos (nucleotidos) y la coordenada

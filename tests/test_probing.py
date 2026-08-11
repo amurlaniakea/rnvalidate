@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """R3 — chemical probing (SHAPE/DMS) consistency (external-validity tests).
 
 The reactivity of each nucleotide (0..1) is compared against the paired /

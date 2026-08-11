@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """R4 — designability / foldable topology (external-validity tests).
 
 Heuristic, CPU-only: needs enough residues, no impossible backbone jump

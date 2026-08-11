@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """F1 — hydrolysis propensity / tube false-positive (external-validity tests).
 
 DERIVED rule (risk R5): estimates spontaneous backbone phosphodiester

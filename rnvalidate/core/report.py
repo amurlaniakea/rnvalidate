@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Render de veredictos a JSON, Markdown y SARIF 2.1.0."""
 
 from __future__ import annotations
