@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """R1 - Consistencia FRET.
 
 Toma las distancias caidas de la estructura 3D (entre atomos C1' de pares de

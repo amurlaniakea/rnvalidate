@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """CLI end-to-end + external-validity + predictor-agnosticism (AC-8).
 
 The CLI is exercised IN-PROCESS via Typer's CliRunner so that coverage is

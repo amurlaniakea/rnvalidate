@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Tests de salida SARIF 2.1.0 (feature 004) — RNAValidate.
 
 Guarda de integridad LOCAL del schema (no sincronización con upstream):

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """Registry de reglas y orquestador apply_rules().
 
 Cada regla es una funcion pura (RnaInput) -> Optional[RuleViolation].

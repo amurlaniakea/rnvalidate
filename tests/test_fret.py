@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2026 Pedro Sordo Martínez <amurlaniakea@gmail.com>
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
 """R1 — FRET consistency (external-validity unit tests).
 
 Each test builds an explicit RnaInput with independent ground truth
